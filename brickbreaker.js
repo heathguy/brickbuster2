@@ -1,5 +1,5 @@
-let SCREEN_WIDTH = 500;
-let SCREEN_HEIGHT = 500;
+let SCREEN_WIDTH = 800;
+let SCREEN_HEIGHT = 600;
 
 let PLAYFIELD_MAXWIDTH = SCREEN_WIDTH * 0.85;
 let PLAYFIELD_MAXHEIGHT = SCREEN_HEIGHT * 0.85;
@@ -18,38 +18,42 @@ let lives = 3;
 let playerHasGuns = false;
 let playerGunTimer = 30;
 
-let INIT_PLAYER_SIZE = SCREEN_WIDTH / 7;
+let INIT_PLAYER_SIZE = SCREEN_WIDTH / 10;
 
 function setup() {
   createCanvas(SCREEN_WIDTH, SCREEN_HEIGHT);
   frameRate(60);
   
-  powerupList.push(new Powerup(-100,100,0));
+  // add a dummy power up to initial list
+  //powerupList.push(new Powerup(-100,100,0));
+  //powerupList.pop();
 
   player = new Paddle(PLAYFIELD_MAXWIDTH/2, PLAYFIELD_MAXHEIGHT, int(INIT_PLAYER_SIZE), 15);
   ballList.push(new Ball(PLAYFIELD_MAXWIDTH/2,PLAYFIELD_MAXHEIGHT - 15-player.sizeY));
   
   //create basic level
-  brickX = 100;
-  brickY = 100;
-  for(let i = 0; i < 7; i++) {
-    brick = new Brick(brickX, brickY, color(0,255,255), 1);
+  let brickX = 100;
+  let brickY = 100;
+  //let brickRow1Color = p5.Color(0,255,255);
+
+  for(let i = 0; i < 14; i++) {
+    let brick = new Brick(brickX, brickY, color(0,255,255), 1);
     brickList.push(brick);
-    brickX += brick.width;
+    brickX += brick.width+3;
   }
   brickX = 100;
-  brickY = 120;
-  for(let i = 0; i < 7; i++) {
+  brickY = 123;
+  for(let i = 0; i < 14; i++) {
     brick = new Brick(brickX, brickY, color(255,255,0), 1);
     brickList.push(brick);
-    brickX += brick.width;
+    brickX += brick.width+3;
   }
   brickX = 100;
-  brickY = 140;
-  for(let i = 0; i < 7; i++) {
+  brickY = 146;
+  for(let i = 0; i < 14; i++) {
     brick = new Brick(brickX, brickY, color(255,0,255), 1);
     brickList.push(brick);
-    brickX += brick.width;
+    brickX += brick.width+3;
   }
 }
 
@@ -128,12 +132,12 @@ function draw() {
     checkPaddleCollision(ballList[b]);
   }
   
-  for (let p = powerupList.length-1; p > 0; p--) {
+  for (let p = powerupList.length-1; p >= 0; p--) {
     //console.log(powerupList.length);
     let powerUpCollected = checkPowerupCollision(powerupList[p], player);
     if(powerUpCollected) {
+      //console.log("POWERUP COLLECTED");
       if(powerupList[p].type == 1) {
-        //console.log("POWERUP COLLECTED");
         // size UP
         if(player.sizeX+20 <= player.maxSize) { 
           console.log("SIZE UP");
@@ -156,21 +160,23 @@ function draw() {
       }
     }
   }
-  
+  push();
   for (let b = 0; b < ballList.length; b++) {
     ballList[b].update();
     ballList[b].draw();
   }
-  
-   for (let p = powerupList.length-1; p > 0; p--) {
-    if(powerupList[p].position.y > player.position.y + player.sizeY)     {
-      powerupList.splice(p,1);
-      break;
-    }
+  pop();
+  push();
+   for (let p = powerupList.length-1; p >= 0; p--) {
+    //console.log("POWERUP LIST LENGTH: ", powerupList.length);
+    //console.log("POWERUP: ", powerupList[p]);
     powerupList[p].update();
     powerupList[p].draw();
+    if(powerupList[p].position.y > player.position.y + player.sizeY)     {
+      powerupList.splice(p,1);
+    }
   }
-  
+  pop();
   push();
   player.draw();
   player.update(PLAYFIELD_MINWIDTH,(SCREEN_WIDTH - PLAYFIELD_MINWIDTH)-player.sizeX);
@@ -361,11 +367,18 @@ class Brick {
   }
   
   draw() {
-    fill(50, 50, 50);
-    rect(this.position.x, this.position.y, this.width, this.height);
+    strokeWeight(5);
+    fill(250, 250, 250);
+    rect(this.position.x, this.position.y, this.width, this.height, 10);
+    noStroke();
+    let r = red(this.color);
+    let g = green(this.color)+75;
+    let b = blue(this.color)+75;
+    fill(color(r,g,b));
+    rect(this.position.x, this.position.y, this.width, this.height/2, 10);
     fill(this.color);
-    rect(this.position.x, this.position.y, this.width, this.height);
-    
+    rect(this.position.x, this.position.y+ this.height/2, this.width, this.height/2, 10);
+    strokeWeight(1);
     if(this.containsPowerUp) {
       fill(0);
       text("P", this.position.x+this.width/2-5, this.position.y+this.height/2+5);
@@ -410,7 +423,7 @@ class Powerup {
     this.position = new p5.Vector(x, y);
     this.type = type;
     this.velocity = new p5.Vector(0,1);
-    this.speed = 2;
+    this.speed = 3;
     this.velocity.mult(this.speed);
     this.width = 40;
     this.height = 20;
@@ -425,12 +438,12 @@ class Powerup {
       fill(255,0,0);
     }
     rect(this.position.x, this.position.y, this.width, this.height);
+    //this.velocity += 0.01;
   }
   
   update() {
     this.position.add(this.velocity);
-    // make the powerup fall faster and faster
-    this.velocity.add(0,0.1);
+    //this.velocity += .01;
   }
 }
 
