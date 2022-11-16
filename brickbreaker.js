@@ -429,6 +429,8 @@ class Powerup {
   
   update() {
     this.position.add(this.velocity);
+    // make the powerup fall faster and faster
+    this.velocity.add(0,0.1);
   }
 }
 
