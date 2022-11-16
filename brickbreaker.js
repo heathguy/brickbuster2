@@ -106,7 +106,15 @@ function draw() {
           if(brickList[c].containsPowerUp) {
             //generate
             //console.log("ADD POWERUP");
-            powerupList.push(new Powerup(brickList[c].position.x,brickList[c].position.y,1,0));
+            let powUpNum = int(random(1,3));
+            let powUpGood = true;
+            if(powUpNum == 1) {
+              powUpGood = true;
+            }
+            else if(powUpNum == 2) {
+              powUpGood = false;
+            }
+            powerupList.push(new Powerup(brickList[c].position.x,brickList[c].position.y,powUpNum,powUpGood));
           }
           score += 100;
           brickList.splice(c,1);
@@ -122,15 +130,30 @@ function draw() {
   
   for (let p = powerupList.length-1; p > 0; p--) {
     //console.log(powerupList.length);
-    let ptype = checkPowerupCollision(powerupList[p], player);
-    if(ptype > 0) {
-      //console.log("POWERUP COLLECTED");
-      // size UP
-      if(ptype == 1 && (player.sizeX+20 < player.maxSize)) { 
-        console.log("SIZE UP");
-        player.sizeX += 20;
+    let powerUpCollected = checkPowerupCollision(powerupList[p], player);
+    if(powerUpCollected) {
+      if(powerupList[p].type == 1) {
+        //console.log("POWERUP COLLECTED");
+        // size UP
+        if(player.sizeX+20 <= player.maxSize) { 
+          console.log("SIZE UP");
+          player.sizeX += 20;
+        }
+        else {
+          player.sizeX = player.maxSize;
+        }
+        powerupList.splice(p,1);
       }
-      powerupList.splice(p,1);
+      else if(powerupList[p].type == 2) {
+        if(player.sizeX-20 >= player.minSize) {
+          console.log("SIZE DOWN");
+          player.sizeX -= 20;
+        }
+        else {
+          player.sizeX = player.minSize;
+        }
+        powerupList.splice(p,1);
+      }
     }
   }
   
@@ -330,7 +353,7 @@ class Brick {
     this.height = 20;
 
     let powerUpChance = random();
-    if(powerUpChance < 0.2) {
+    if(powerUpChance < 0.9) {
       this.containsPowerUp = true;
     } else {
       this.containsPowerUp = false;
